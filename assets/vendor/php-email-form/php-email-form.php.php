@@ -1,31 +1,30 @@
 <?php
-// Replace contact@example.com with your real receiving email address
-$receiving_email_address = 'raaviakash03@gmail.com';
-
-if (file_exists($php_email_form = '../assets/vendor/php-email-form/php-email-form.php')) {
-    include($php_email_form);
-} else {
-    die('Unable to load the "PHP Email Form" Library!');
-}
-
-$contact = new PHP_Email_Form;
-$contact->ajax = true;
-
-$contact->to = $receiving_email_address;
-$contact->from_name = $_POST['name'];
-$contact->from_email = $_POST['email'];
-$contact->subject = $_POST['subject'];
-$contact->message = $_POST['message']; // Add message field
-
-// You can also add additional fields as needed
-// $contact->add_message($_POST['field_name'], 'Field Name: ');
-
-// Send the email
-if (!$contact->send()) {
-    // If the email failed to send
-    echo 'Error: ' . $contact->error();
-} else {
-    // If the email was sent successfully
-    echo 'Your message has been sent successfully.';
+// Check if the form is submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Check if all required fields are filled
+    if (!empty($_POST['name']) && !empty($_POST['email']) && !empty($_POST['subject']) && !empty($_POST['message'])) {
+        // Sanitize input data to prevent SQL injection
+        $name = htmlspecialchars($_POST['name']);
+        $email = htmlspecialchars($_POST['email']);
+        $subject = htmlspecialchars($_POST['subject']);
+        $message = htmlspecialchars($_POST['message']);
+        
+        // Set recipient email address
+        $to = "recipient@example.com"; // Change this to your email address
+        
+        // Construct email headers
+        $headers = "From: $email" . "\r\n" .
+                    "Reply-To: $email" . "\r\n" .
+                    "X-Mailer: PHP/" . phpversion();
+        
+        // Send email
+        if (mail($to, $subject, $message, $headers)) {
+            echo "Your message has been sent successfully.";
+        } else {
+            echo "There was a problem sending your message. Please try again later.";
+        }
+    } else {
+        echo "Please fill in all required fields.";
+    }
 }
 ?>
